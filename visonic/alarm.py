@@ -1,5 +1,6 @@
 import json
 import requests
+from requests.adapters import HTTPAdapter, Retry
 import logging
 import sched
 import threading
@@ -164,9 +165,9 @@ class System(object):
     __system_alarm = False
     __system_devices = []
 
-    def __init__(self, hostname, app_id, user_code, user_email, user_password, panel_id, partition):
+    def __init__(self, hostname, app_id, user_code, user_email, user_password, panel_id, partition, max_retries=20, retry_backoff=0.1):
         """ Initiate the connection to the Visonic API """
-        self.__api = API(hostname, app_id, user_code, user_email, user_password, panel_id, partition)
+        self.__api = API(hostname, app_id, user_code, user_email, user_password, panel_id, partition, max_retries, retry_backoff)
 
     # System properties
     @property
@@ -549,7 +550,7 @@ class API(object):
     __session = None
     __system_devices = []
 
-    def __init__(self, hostname, app_id, user_code, user_email, user_password, panel_id, partition):
+    def __init__(self, hostname, app_id, user_code, user_email, user_password, panel_id, partition, max_retries, retry_backoff):
         """ Class constructor initializes all URL variables. """
 
         # Set connection specific details
@@ -565,6 +566,12 @@ class API(object):
 
         # Create a new session
         self.__session = requests.session()
+
+        retries = Retry(total=max_retries,
+                        backoff_factor=retry_backoff,
+                        backoff_max=20)
+
+        self.__session.mount('https://{url}'.format(url=self.__hostname), requests.adapters.HTTPAdapter(max_retries=5))
 
     def __send_get_request(self, url, with_user_token, with_session_token):
         """ Send a GET request to the server. Includes the Session-Token

@@ -33,8 +33,10 @@ def main():
 	partition = '-1'
 	user_email = "your@email.com"
 	user_password = "yourpassword"
+	max_retries = 20
+	retry_backoff = 0.1
 
-	api = alarm.System(hostname, app_id, user_code, user_email, user_password, panel_id, partition)
+	api = alarm.System(hostname, app_id, user_code, user_email, user_password, panel_id, partition, max_retries, retry_backoff)
 
 	res = api.connect()
 	res = api.update_devices()
