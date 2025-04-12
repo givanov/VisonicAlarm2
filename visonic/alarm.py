@@ -568,10 +568,9 @@ class API(object):
         self.__session = requests.session()
 
         retries = Retry(total=max_retries,
-                        backoff_factor=retry_backoff,
-                        backoff_max=20)
+                        backoff_factor=retry_backoff)
 
-        self.__session.mount('https://{url}'.format(url=self.__hostname), requests.adapters.HTTPAdapter(max_retries=5))
+        self.__session.mount('https://{url}'.format(url=self.__hostname), requests.adapters.HTTPAdapter(max_retries=retries))
 
     def __send_get_request(self, url, with_user_token, with_session_token):
         """ Send a GET request to the server. Includes the Session-Token
