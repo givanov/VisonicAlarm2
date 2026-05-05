@@ -199,7 +199,7 @@ class System(object):
     @property
     def is_token_valid(self):
         """ If the alarm system is active or not. """
-        return self.__api.is_logged_in
+        return self.__api.is_logged_in()
 
     @property
     def session_token(self):
@@ -594,8 +594,8 @@ class API(object):
         logging.debug(headers)
         logging.debug('=== END REQUEST ===')
 
-        # Perform the request and log an exception
-        # if the response is not OK (HTML 200)
+        # Perform the request. Raise on HTTP error so callers can react
+        # (e.g. re-login on 401) instead of silently receiving None.
         logging.debug('=== BEGIN RESPONSE ===')
         try:
             response = self.__session.get(url, headers=headers)
@@ -603,16 +603,13 @@ class API(object):
         except requests.exceptions.HTTPError as err:
             logging.error(err)
             logging.error(response.content.decode('utf-8'))
-
-        if response.status_code == requests.codes.ok:
-            resp = json.loads(response.content.decode('utf-8'))
-            logging.debug(resp)
-
             logging.debug('=== END RESPONSE ===')
-            return resp
-        else:
-            logging.error(response.content.decode('utf-8'))
-            logging.debug('=== END RESPONSE ===')
+            raise
+
+        resp = json.loads(response.content.decode('utf-8'))
+        logging.debug(resp)
+        logging.debug('=== END RESPONSE ===')
+        return resp
 
     def __send_post_request(self, url, data_json, with_user_token, with_session_token):
         """ Send a POST request to the server. Includes the Session-Token
@@ -643,8 +640,8 @@ class API(object):
         logging.debug(data_json)
         logging.debug('=== END REQUEST ===')
 
-        # Perform the request and log an exception
-        # if the response is not OK (HTML 200)
+        # Perform the request. Raise on HTTP error so callers can react
+        # (e.g. re-login on 401) instead of silently receiving None.
         logging.debug('=== BEGIN RESPONSE ===')
         try:
             response = self.__session.post(url, headers=headers, data=data_json)
@@ -652,17 +649,13 @@ class API(object):
         except requests.exceptions.HTTPError as err:
             logging.error(err)
             logging.error(response.content.decode('utf-8'))
+            logging.debug('=== END RESPONSE ===')
+            raise
 
-        # Check HTTP response code
-        if response.status_code == requests.codes.ok:
-            resp = json.loads(response.content.decode('utf-8'))
-            logging.debug(resp)
-            logging.debug('=== END RESPONSE ===')
-            return resp
-        else:
-            logging.error(response.content.decode('utf-8'))
-            logging.debug('=== END RESPONSE ===')
-            return None
+        resp = json.loads(response.content.decode('utf-8'))
+        logging.debug(resp)
+        logging.debug('=== END RESPONSE ===')
+        return resp
 
     ######################
     # Public API methods #
