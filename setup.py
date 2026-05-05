@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="visonicalarm2",
-    version="1.1.3",
+    version="1.1.5",
     author="Georgi Ivanov",
     description="A simple API library for the Visonic/Bentel/Tyco Alarm system.",
     url="https://github.com/givanov/VisonicAlarm2",
