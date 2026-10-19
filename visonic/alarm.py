@@ -246,14 +246,15 @@ class System(object):
         rest_versions = self.__api.get_version_info()['rest_versions']
 
 
-        if '13.0' in rest_versions:
-            _LOGGER.info('Visonics Rest API version 13.0 is supported.')
-            self.__api.setVersionUrls('13.0')
-        elif '14.0' in rest_versions:
-            _LOGGER.info('Visonics Rest API version 14.0 is supported.')
-            self.__api.setVersionUrls('14.0')
+        # Prefer the newest supported version the server offers.
+        supported_versions = ('15.0', '14.0', '13.0')
+        for version in supported_versions:
+            if version in rest_versions:
+                _LOGGER.info('Visonics Rest API version %s is supported.', version)
+                self.__api.setVersionUrls(version)
+                break
         else:
-            raise Exception(f'Visonics Rest API versions 13.0 or 14.0 are not supported by server. Supported versions: {", ".join(rest_versions)}')
+            raise Exception(f'Visonics Rest API versions {", ".join(supported_versions)} are not supported by server. Supported versions: {", ".join(rest_versions)}')
 
 
         # Try to login and get a user token.
