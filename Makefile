@@ -26,7 +26,7 @@ VERSION ?= $(TMP_VERSION)
 .PHONY: semantic-release-dependencies
 semantic-release-dependencies:
 	@npm install --save-dev semantic-release
-	@npm install @semantic-release/exec conventional-changelog-conventionalcommits -D
+	@npm install @semantic-release/exec conventional-changelog-conventionalcommits@8 -D
 
 .PHONY: semantic-release
 semantic-release: semantic-release-dependencies
